@@ -1257,3 +1257,33 @@ body {
     width: 20px;
     height: 20px
 }
+
+
+.chart_container.tradingview {
+    background-color:#e7ebee;
+}
+
+.chart_container.tradingview #chart_toolbar {
+    color:#4c525e;
+    font-weight:bold;
+    font-size: 14px;
+    background-color:#fff;
+    border-bottom:3px solid #e7ebee;
+    border-radius:0 0 7px 7px;
+}
+
+.chart_container.tradingview .chart_toolbar_tabgroup li a:hover {
+    color: #000
+}
+
+.chart_container.tradingview .chart_toolbar_tabgroup li a.selected {
+    color: #37a6ef
+}
+
+#chart_main_info {
+    font-color:#4c525e;
+    position: absolute;
+    margin: 4px 8px;
+    font-size: 14px;
+    font-family: 微软雅黑;
+}

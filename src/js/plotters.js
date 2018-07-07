@@ -231,19 +231,21 @@ export class CGridPlotter extends NamedObject {
             clipped = true;
         }
         let theme = mgr.getTheme(this.getFrameName());
-        context.fillStyle = theme.getColor(themes.Theme.Color.Grid0);
-        context.beginPath();
-        let dashLen = 4,
-            dashSolid = 1;
-        if (Plotter.isChrome) {
-            dashLen = 4;
-            dashSolid = 1;
-        }
+        //context.fillStyle = theme.getColor(themes.Theme.Color.Grid0);
+        context.strokeStyle = theme.getColor(themes.Theme.Color.Grid0);
+        //context.beginPath();
+        //let dashLen = 4,
+        //    dashSolid = 1;
+        //if (Plotter.isChrome) {
+        //    dashLen = 4;
+        //    dashSolid = 1;
+        //}
         let gradations = range.getGradations();
         for (let n in gradations) {
-            Plotter.createHorzDashedLine(context, area.getLeft(), area.getRight(), range.toY(gradations[n]), dashLen, dashSolid);
+            //Plotter.createHorzDashedLine(context, area.getLeft(), area.getRight(), range.toY(gradations[n]), dashLen, dashSolid);
+            Plotter.drawLine(context, 0, range.toY(gradations[n]), area.getRight(), range.toY(gradations[n]));
         }
-        context.fill();
+        //context.fill();
         if (clipped) {
             context.restore();
         }
@@ -271,6 +273,10 @@ export class CandlestickPlotter extends NamedObject {
             return;
         }
         let theme = mgr.getTheme(this.getFrameName());
+        if (Util.isInstance(theme, themes.TradingViewTheme)) {
+            this.DrawTradingView(context);
+            return;
+        }
         let dark = Util.isInstance(theme, themes.DarkTheme);
         let first = timeline.getFirstIndex();
         let last = timeline.getLastIndex();
@@ -350,6 +356,112 @@ export class CandlestickPlotter extends NamedObject {
         }
         if (fillNegRects.length > 0) {
             context.fillStyle = theme.getColor(themes.Theme.Color.Negative);
+            Plotter.createRectangles(context, fillNegRects);
+            context.fill();
+        }
+    }
+
+    DrawTradingView(context) {
+        let mgr = new ChartManager();
+        let ds = mgr.getDataSource(this.getDataSourceName());
+        if (ds.getDataCount() < 1) {
+            return;
+        }
+        let area = mgr.getArea(this.getAreaName());
+        let timeline = mgr.getTimeline(this.getDataSourceName());
+        let range = mgr.getRange(this.getAreaName());
+        if (range.getRange() === 0.0) {
+            return;
+        }
+        let theme = mgr.getTheme(this.getFrameName());
+        let first = timeline.getFirstIndex();
+        let last = timeline.getLastIndex();
+        let start;
+        if (area.isChanged() || timeline.isUpdated() || range.isUpdated())
+            start = first;
+        else
+            start = Math.max(first, last - 2);
+        let cW = timeline.getColumnWidth();
+        let iW = timeline.getItemWidth();
+        let left = timeline.toItemLeft(start);
+        let center = timeline.toItemCenter(start);
+        let strokePosRects = [];
+        let strokeNegRects = [];
+        let fillPosRects = [];
+        let fillUchRects = [];
+        let fillNegRects = [];
+        for (let i = start; i < last; i++) {
+            let data = ds.getDataAt(i);
+            let high = range.toY(data.high);
+            let low = range.toY(data.low);
+            let open = data.open;
+            let close = data.close;
+            if (close > open) {
+                let top = range.toY(close);
+                let bottom = range.toY(open);
+                let iH = Math.max(bottom - top, 1);
+                strokePosRects.push({x: left + 0.5, y: top + 0.5, w: iW - 1, h: iH - 1});
+                if (data.high > close) {
+                    high = Math.min(high, top - 1);
+                    fillPosRects.push({x: center, y: high, w: 1, h: top - high});
+                }
+                if (open > data.low) {
+                    low = Math.max(low, bottom + 1);
+                    fillPosRects.push({x: center, y: bottom, w: 1, h: low - bottom});
+                }
+            } else if (close === open) {
+                let top = range.toY(close);
+                fillUchRects.push({x: left, y: top, w: Math.max(iW, 1), h: 1});
+                if (data.high > close)
+                    high = Math.min(high, top - 1);
+                if (open > data.low)
+                    low = Math.max(low, top + 1);
+                if (high < low)
+                    fillUchRects.push({x: center, y: high, w: 1, h: low - high});
+            } else {
+                let top = range.toY(open);
+                let bottom = range.toY(close);
+                let iH = Math.max(bottom - top, 1);
+                //fillNegRects.push({x: left, y: top, w: Math.max(iW, 1), h: Math.max(iH, 1)});
+                strokeNegRects.push({x: left + 0.5, y: top + 0.5, w: iW - 1, h: iH - 1});
+                if (data.high > open) {
+                    high = Math.min(high, top - 1);
+                    fillNegRects.push({x: center, y: high, w: 1, h: top - high});
+                }
+                if (close > data.low)
+                    low = Math.max(low, bottom + 1);
+                if (high < low)
+                    fillNegRects.push({x: center, y: bottom, w: 1, h: low - bottom});
+            }
+            left += cW;
+            center += cW;
+        }
+        if (strokePosRects.length > 0) {
+            Plotter.createRectangles(context, strokePosRects);
+            context.fillStyle = theme.getColor(themes.Theme.Color.Positive);
+            context.strokeStyle = theme.getColor(themes.Theme.Color.PositiveBorder);
+            context.fill();
+            context.stroke();
+        }
+        if (fillPosRects.length > 0) {
+            context.fillStyle = theme.getColor(themes.Theme.Color.PositiveWick);
+            Plotter.createRectangles(context, fillPosRects);
+            context.fill();
+        }
+        if (fillUchRects.length > 0) {
+            context.fillStyle = theme.getColor(themes.Theme.Color.NegativeWick);
+            Plotter.createRectangles(context, fillUchRects);
+            context.fill();
+        }
+        if (strokeNegRects.length > 0) {
+            Plotter.createRectangles(context, strokeNegRects);
+            context.fillStyle = theme.getColor(themes.Theme.Color.Negative);
+            context.strokeStyle = theme.getColor(themes.Theme.Color.NegativeBorder);
+            context.fill();
+            context.stroke();
+        }
+        if (fillNegRects.length > 0) {
+            context.fillStyle = theme.getColor(themes.Theme.Color.NegativeWick);
             Plotter.createRectangles(context, fillNegRects);
             context.fill();
         }
@@ -591,18 +703,27 @@ export class MainInfoPlotter extends Plotter {
         let hour = Util.formatTime(time.getHours());
         let minute = Util.formatTime(time.getMinutes());
         let lang = mgr.getLanguage();
+        let mainInfoDiv = $('#chart_main_info');
         if (lang === "zh-cn") {
-            if (!Plotter.drawString(context, '时间: ' +
-                    year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
-                return;
-            if (!Plotter.drawString(context, '  开: ' + data.open.toFixed(digits), rect))
-                return;
-            if (!Plotter.drawString(context, '  高: ' + data.high.toFixed(digits), rect))
-                return;
-            if (!Plotter.drawString(context, '  低: ' + data.low.toFixed(digits), rect))
-                return;
-            if (!Plotter.drawString(context, '  收: ' + data.close.toFixed(digits), rect))
-                return;
+            //if (!Plotter.drawString(context, '时间: ' +
+            //        year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
+            //    return;
+            mainInfoDiv.find('.date').text('时间: ' +
+                    year + '-' + month + '-' + date + '  ' + hour + ':' + minute);
+            //if (!Plotter.drawString(context, '  开: ' + data.open.toFixed(digits), rect))
+            //    return;
+            //if (!Plotter.drawString(context, '  高: ' + data.high.toFixed(digits), rect))
+            //    return;
+            //if (!Plotter.drawString(context, '  低: ' + data.low.toFixed(digits), rect))
+            //    return;
+            //if (!Plotter.drawString(context, '  收: ' + data.close.toFixed(digits), rect))
+            //    return;
+            mainInfoDiv.find('.price').text(
+                '  开: ' + data.open.toFixed(digits)
+                + '  高: ' + data.high.toFixed(digits)
+                + '  低: ' + data.low.toFixed(digits)
+                + '  收: ' + data.close.toFixed(digits)
+            );
         } else if (lang === "en-us") {
             if (!Plotter.drawString(context, 'DATE: ' +
                     year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
@@ -629,9 +750,11 @@ export class MainInfoPlotter extends Plotter {
                 return;
         }
         if (selIndex > 0) {
+            let increase = '';
             if (lang === "zh-cn") {
-                if (!Plotter.drawString(context, '  涨幅: ', rect))
-                    return;
+                //if (!Plotter.drawString(context, '  涨幅: ', rect))
+                //    return;
+                increase += '  涨幅: ';
             } else if (lang === "en-us") {
                 if (!Plotter.drawString(context, '  CHANGE: ', rect))
                     return;
@@ -655,14 +778,17 @@ export class MainInfoPlotter extends Plotter {
                 change = change.toFixed(2);
                 context.fillStyle = theme.getColor(themes.Theme.Color.TextNegative);
             }
-            if (!Plotter.drawString(context, change, rect))
-                return;
-            context.fillStyle = theme.getColor(themes.Theme.Color.Text4);
-            if (!Plotter.drawString(context, ' %', rect))
-                return;
+            //if (!Plotter.drawString(context, change, rect))
+            //    return;
+            //context.fillStyle = theme.getColor(themes.Theme.Color.Text4);
+            //if (!Plotter.drawString(context, ' %', rect))
+            //    return;
+            increase += change + ' %';
+            mainInfoDiv.find('.increase').text(increase);
         }
 
         let amplitude;
+        let strAmplitude = '';
         if ((data.high - data.low) / data.low * 100.0) {
             amplitude = (data.high - data.low) / data.low * 100.0;
         } else {
@@ -670,12 +796,15 @@ export class MainInfoPlotter extends Plotter {
         }
 
         if (lang === "zh-cn") {
-            if (!Plotter.drawString(context, '  振幅: ' + amplitude.toFixed(2) + ' %', rect)) {
-                return;
-            }
-            if (!Plotter.drawString(context, '  量: ' + data.volume.toFixed(2), rect)) {
-                return;
-            }
+            //if (!Plotter.drawString(context, '  振幅: ' + amplitude.toFixed(2) + ' %', rect)) {
+            //    return;
+            //}
+            strAmplitude += '  振幅: ' + amplitude.toFixed(2) + ' %';
+            //if (!Plotter.drawString(context, '  量: ' + data.volume.toFixed(2), rect)) {
+            //    return;
+            //}
+            strAmplitude += '  量: ' + data.volume.toFixed(2);
+            mainInfoDiv.find('.amplitude').text(strAmplitude);
         } else if (lang === "en-us") {
             if (!Plotter.drawString(context, '  AMPLITUDE: ' + amplitude.toFixed(2) + ' %', rect)) {
                 return;
@@ -833,12 +962,12 @@ export class IndicatorPlotter extends NamedObject {
             context.stroke();
         }
         if (fillPosRects.length > 0) {
-            context.fillStyle = theme.getColor(themes.Theme.Color.Positive);
+            context.fillStyle = theme.getColor(themes.Theme.Color.VolumePositive);
             Plotter.createRectangles(context, fillPosRects);
             context.fill();
         }
         if (fillNegRects.length > 0) {
-            context.fillStyle = theme.getColor(themes.Theme.Color.Negative);
+            context.fillStyle = theme.getColor(themes.Theme.Color.VolumeNegative);
             Plotter.createRectangles(context, fillNegRects);
             context.fill();
         }
@@ -1623,12 +1752,17 @@ export class LastClosePlotter extends Plotter {
         context.textAlign = "left";
         context.textBaseline = "middle";
         context.fillStyle = theme.getColor(themes.Theme.Color.RangeMark);
-        context.strokeStyle = theme.getColor(themes.Theme.Color.RangeMark);
+        context.strokeStyle = theme.getColor(themes.Theme.Color.Text5);
         let y = range.toY(v);
         let left = area.getLeft() + 1;
-        Plotter.drawLine(context, left, y, left + 7, y);
-        Plotter.drawLine(context, left, y, left + 3, y + 2);
-        Plotter.drawLine(context, left, y, left + 3, y - 2);
+        context.fillRect(left, y - 10, area.getWidth(), 20);
+        Plotter.drawLine(context, left, y, left + 4, y);
+        context.strokeStyle = '#000';theme.getColor(themes.Theme.Color.Text5);
+        Plotter.createHorzDashedLine(context, 0, left, y, 3, 1);
+        context.fill();
+        //Plotter.drawLine(context, left, y, left + 3, y + 2);
+        //Plotter.drawLine(context, left, y, left + 3, y - 2);
+        context.fillStyle = theme.getColor(themes.Theme.Color.Text5);
         context.fillText(Util.fromFloat(v, ds.getDecimalDigits()), left + 10, y);
     }
 
@@ -1655,10 +1789,14 @@ export class SelectionPlotter extends Plotter {
         let theme = mgr.getTheme(this.getFrameName());
         context.strokeStyle = theme.getColor(themes.Theme.Color.Cursor);
         let x = timeline.toItemCenter(timeline.getSelectedIndex());
-        Plotter.drawLine(context, x, area.getTop() - 1, x, area.getBottom());
+        //Plotter.drawLine(context, x, area.getTop() - 1, x, area.getBottom());
+        let dashLen = 10,
+            dashSolid = 5;
+        Plotter.drawDashedLine(context, x, area.getTop() - 1, x, area.getBottom(), dashLen, dashSolid);
         let pos = range.getSelectedPosition();
         if (pos >= 0) {
-            Plotter.drawLine(context, area.getLeft(), pos, area.getRight(), pos);
+            context.fillStyle = theme.getColor(themes.Theme.Color.Cursor);
+            Plotter.drawDashedLine(context, area.getLeft(), pos, area.getRight(), pos, dashLen, dashSolid);
         }
     }
 
@@ -1698,25 +1836,33 @@ export class TimelineSelectionPlotter extends Plotter {
         let theme = mgr.getTheme(this.getFrameName());
         let lang = mgr.getLanguage();
         let x = timeline.toItemCenter(timeline.getSelectedIndex());
-        context.fillStyle = theme.getColor(themes.Theme.Color.Background);
-        context.fillRect(x - 52.5, area.getTop() + 2.5, 106, 18);
-        context.strokeStyle = theme.getColor(themes.Theme.Color.Grid3);
-        context.strokeRect(x - 52.5, area.getTop() + 2.5, 106, 18);
+        context.fillStyle = theme.getColor(themes.Theme.Color.SelectionBackground);
+        context.fillRect(x - 52.5 - 15, area.getTop(), 106 + 30, area.getHeight());
+        //context.strokeStyle = theme.getColor(themes.Theme.Color.Grid3);
+        //context.strokeRect(x - 52.5 - 15, area.getTop() + 2.5 - 2, 106 + 30, area.getHeight());
         context.font = theme.getFont(themes.Theme.Font.Default);
         context.textAlign = "center";
         context.textBaseline = "middle";
-        context.fillStyle = theme.getColor(themes.Theme.Color.Text4);
+        context.fillStyle = theme.getColor(themes.Theme.Color.Text5);
         let time = new Date(ds.getDataAt(timeline.getSelectedIndex()).date);
+        let year = time.getFullYear();
         let month = time.getMonth() + 1;
         let date = time.getDate();
         let hour = time.getHours();
         let minute = time.getMinutes();
         let second = time.getSeconds();
+        let strYear = year.toString();
         let strMonth = month.toString();
         let strDate = date.toString();
         let strHour = hour.toString();
         let strMinute = minute.toString();
         let strSecond = second.toString();
+        if (month < 10) {
+            strMonth = "0" + strMonth;
+        }
+        if (hour < 10) {
+            strHour = "0" + strHour;
+        }
         if (minute < 10) {
             strMinute = "0" + strMinute;
         }
@@ -1725,10 +1871,10 @@ export class TimelineSelectionPlotter extends Plotter {
         }
         let text = "";
         if (lang === "zh-cn") {
-            text = strMonth + "月" + strDate + "日  " +
+            text = strYear + "-" + strMonth + "-" + strDate + "  " +
                 strHour + ":" + strMinute;
         } else if (lang === "zh-tw") {
-            text = strMonth + "月" + strDate + "日  " +
+            text = strYear + "-" + strMonth + "-" + strDate + "  " +
                 strHour + ":" + strMinute;
         } else if (lang === "en-us") {
             text = TimelineSelectionPlotter.MonthConvert[month] + " " + strDate + "  " +
@@ -1767,22 +1913,27 @@ export class RangeSelectionPlotter extends NamedObject {
             return;
         }
         let y = range.getSelectedPosition();
-        Plotter.createPolygon(context, [
-            {"x": area.getLeft(), "y": y},
-            {"x": area.getLeft() + 5, "y": y + 10},
-            {"x": area.getRight() - 3, "y": y + 10},
-            {"x": area.getRight() - 3, "y": y - 10},
-            {"x": area.getLeft() + 5, "y": y - 10}
-        ]);
+        //Plotter.createPolygon(context, [
+        //    {"x": area.getLeft(), "y": y},
+        //    {"x": area.getLeft() + 5, "y": y + 10},
+        //    {"x": area.getRight() - 3, "y": y + 10},
+        //    {"x": area.getRight() - 3, "y": y - 10},
+        //    {"x": area.getLeft() + 5, "y": y - 10}
+        //]);
         let theme = mgr.getTheme(this.getFrameName());
-        context.fillStyle = theme.getColor(themes.Theme.Color.Background);
-        context.fill();
-        context.strokeStyle = theme.getColor(themes.Theme.Color.Grid4);
-        context.stroke();
+        context.fillStyle = theme.getColor(themes.Theme.Color.SelectionBackground);
+        context.fillRect(area.getLeft(), y - 10, area.getWidth(), 20);
+        //context.strokeStyle = theme.getColor(themes.Theme.Color.Grid3);
+        //context.strokeRect(area.getLeft(), y - 10, area.getWidth(), 20);
+
+        //context.fillStyle = theme.getColor(themes.Theme.Color.SelectionBackground);
+        //context.fill();
+        //context.strokeStyle = theme.getColor(themes.Theme.Color.Grid4);
+        //context.stroke();
         context.font = theme.getFont(themes.Theme.Font.Default);
         context.textAlign = "center";
         context.textBaseline = "middle";
-        context.fillStyle = theme.getColor(themes.Theme.Color.Text3);
+        context.fillStyle = theme.getColor(themes.Theme.Color.Text5);
         let digits = 2;
         if (range.getNameObject().getCompAt(2) === "main") {
             digits = mgr.getDataSource(this.getDataSourceName()).getDecimalDigits();

@@ -237,6 +237,8 @@ export class Control {
             this.switchTheme('dark');
         } else if (tmp.theme === 'Light') {
             this.switchTheme('light');
+        } else if (tmp.theme === 'TradingView') {
+            this.switchTheme('tradingview');
         }
         this.chartSwitchLanguage(tmp.language || "zh-cn");
     }
@@ -315,6 +317,7 @@ export class Control {
         });
         let toolBar = $('#chart_toolbar');
         let toolPanel = $('#chart_toolpanel');
+        let mainInfo = $('#chart_main_info');
         let canvasGroup = $('#chart_canvasGroup');
         let tabBar = $('#chart_tabbar');
         let toolPanelShown = toolPanel[0].style.display !== 'inline' ? false : true;
@@ -323,7 +326,7 @@ export class Control {
         toolBarRect.x = 0;
         toolBarRect.y = 0;
         toolBarRect.w = chartWidth;
-        toolBarRect.h = 29;
+        toolBarRect.h = 35;
         let toolPanelRect = {};
         toolPanelRect.x = 0;
         toolPanelRect.y = toolBarRect.h + 1;
@@ -353,6 +356,10 @@ export class Control {
                 height: toolPanelRect.h + 'px'
             });
         }
+        mainInfo.css({
+            left: canvasGroupRect.x + 'px',
+            top: canvasGroupRect.y + 'px'
+        });
 
         canvasGroup.css({
             left: canvasGroupRect.x + 'px',
@@ -470,6 +477,12 @@ export class Control {
             new ChartManager().setThemeName('frame0', 'Light');
             let tmp = ChartSettings.get();
             tmp.theme = 'Light';
+            ChartSettings.save();
+        } else if (name === 'tradingview') {
+            $(".trade_container").addClass("tradingview").removeClass("dark").removeClass("light");
+            new ChartManager().setThemeName('frame0', 'TradingView');
+            let tmp = ChartSettings.get();
+            tmp.theme = 'TradingView';
             ChartSettings.save();
         }
         let a = {};

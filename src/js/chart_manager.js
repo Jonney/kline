@@ -146,6 +146,9 @@ export class ChartManager {
             themeName = "Dark";
         let theme;
         switch (themeName) {
+            case "TradingView":
+                theme = new themes.TradingViewTheme();
+                break;
             case "Light":
                 theme = new themes.LightTheme();
                 break;
@@ -1037,8 +1040,8 @@ export class ChartManager {
         range.setPaddingBottom(4);
         range.setMinInterval(20);
         if (Util.isInstance(indic, indicators.VOLUMEIndicator)) {
-            let plotter = new plotters.LastVolumePlotter(areaName + "Range.decoration");
-            this.setPlotter(plotter.getName(), plotter);
+            //let plotter = new plotters.LastVolumePlotter(areaName + "Range.decoration");
+            //this.setPlotter(plotter.getName(), plotter);
         } else if (Util.isInstance(indic, indicators.BOLLIndicator) || Util.isInstance(indic, indicators.SARIndicator)) {
             let dp = new data_providers.MainDataProvider(areaName + ".main");
             this.setDataProvider(dp.getName(), dp);

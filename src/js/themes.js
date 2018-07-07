@@ -8,10 +8,17 @@ export class Theme {
     static Color = {
         Positive: Theme.theme_color_id++,
         Negative: Theme.theme_color_id++,
+        PositiveBorder: Theme.theme_color_id++,
+        NegativeBorder: Theme.theme_color_id++,
+        PositiveWick: Theme.theme_color_id++,
+        NegativeWick: Theme.theme_color_id++,
         PositiveDark: Theme.theme_color_id++,
         NegativeDark: Theme.theme_color_id++,
+        VolumePositive: Theme.theme_color_id++,
+        VolumeNegative: Theme.theme_color_id++,
         Unchanged: Theme.theme_color_id++,
         Background: Theme.theme_color_id++,
+        SelectionBackground: Theme.theme_color_id++,
         Cursor: Theme.theme_color_id++,
         RangeMark: Theme.theme_color_id++,
         Indicator0: Theme.theme_color_id++,
@@ -32,6 +39,7 @@ export class Theme {
         Text2: Theme.theme_color_id++,
         Text3: Theme.theme_color_id++,
         Text4: Theme.theme_color_id++,
+        Text5: Theme.theme_color_id++,
         LineColorNormal: Theme.theme_color_id++,
         LineColorSelected: Theme.theme_color_id++,
         CircleColorFill: Theme.theme_color_id++,
@@ -149,6 +157,61 @@ export class LightTheme extends Theme {
         this._colors[Theme.Color.CircleColorStroke] = "#393c40";
         this._fonts = [];
         this._fonts[Theme.Font.Default] = "12px Tahoma";
+    }
+
+}
+
+export class TradingViewTheme extends Theme {
+
+    constructor() {
+        super();
+        this._colors = [];
+
+        if (Kline.instance.reverseColor) {
+            this._colors[Theme.Color.Positive] = "rgb(215, 84, 66)";
+            this._colors[Theme.Color.Negative] = "rgb(107, 165, 131)";
+            this._colors[Theme.Color.PositiveDark] = "#ffadaa";
+            this._colors[Theme.Color.NegativeDark] = "#66d293";
+        } else {
+            this._colors[Theme.Color.Positive] = "rgb(107, 165, 131)";
+            this._colors[Theme.Color.PositiveBorder] = "rgb(34, 84, 55)";
+            this._colors[Theme.Color.PositiveWick] = "rgb(115, 115, 117)";
+            this._colors[Theme.Color.Negative] = "rgb(215, 84, 66)";
+            this._colors[Theme.Color.NegativeBorder] = "rgb(91, 26, 19)";
+            this._colors[Theme.Color.NegativeWick] = "rgb(115, 115, 117)";
+            this._colors[Theme.Color.PositiveDark] = "#66d293";
+            this._colors[Theme.Color.NegativeDark] = "#ffadaa";
+            this._colors[Theme.Color.VolumePositive] = "rgba(83, 185, 135, 0.3)";
+            this._colors[Theme.Color.VolumeNegative] = "rgba(235, 77, 92, 0.3)";
+        }
+        this._colors[Theme.Color.Unchanged] = "#fff";
+        this._colors[Theme.Color.Background] = "rgb(242, 242, 242)";
+        this._colors[Theme.Color.SelectionBackground] = "#424242";
+        this._colors[Theme.Color.Cursor] = "rgb(183, 183, 183)";
+        this._colors[Theme.Color.RangeMark] = "#CD3700";
+        this._colors[Theme.Color.Indicator0] = "#2fd2b2";
+        this._colors[Theme.Color.Indicator1] = "#ffb400";
+        this._colors[Theme.Color.Indicator2] = "#e849b9";
+        this._colors[Theme.Color.Indicator3] = "#1478c8";
+        this._colors[Theme.Color.Grid0] = "rgb(230, 230, 230)";
+        this._colors[Theme.Color.Grid1] = "#afb1b3";
+        this._colors[Theme.Color.Grid2] = "#ccc";
+        this._colors[Theme.Color.Grid3] = "#bbb";
+        this._colors[Theme.Color.Grid4] = "#aaa";
+        this._colors[Theme.Color.TextPositive] = "#53b37b";
+        this._colors[Theme.Color.TextNegative] = "#db5542";
+        this._colors[Theme.Color.Text0] = "#ccc";
+        this._colors[Theme.Color.Text1] = "#aaa";
+        this._colors[Theme.Color.Text2] = "#888";
+        this._colors[Theme.Color.Text3] = "#666";
+        this._colors[Theme.Color.Text4] = "#444";
+        this._colors[Theme.Color.Text5] = "#fff";
+        this._colors[Theme.Color.LineColorNormal] = "#8c8c8c";
+        this._colors[Theme.Color.LineColorSelected] = "#393c40";
+        this._colors[Theme.Color.CircleColorFill] = "#ffffff";
+        this._colors[Theme.Color.CircleColorStroke] = "#393c40";
+        this._fonts = [];
+        this._fonts[Theme.Font.Default] = "12px Verdana";
     }
 
 }
