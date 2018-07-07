@@ -1,8 +1,12 @@
 # Kline     [![npm version](https://badge.fury.io/js/kline.svg)](https://badge.fury.io/js/kline)
 
+<a href="http://www.wtfpl.net/"><img
+       src="http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-4.png"
+       width="80" height="15" alt="WTFPL" /></a>
+
 [![NPM](https://nodei.co/npm/kline.png)](https://npmjs.org/package/kline)
 
-> 本项目基于某K线插件做了一些封装和二次开发,使其更加便于使用和修改,方便后来的开发者. 修改主要涉及以下几个点:
+> 本项目扒了某网站的K线插件做了一些封装和二次开发,使其更加便于使用和修改,方便后来的开发者. 修改主要涉及以下几个点:
 
 * 使用 [webpack](https://webpack.js.org/) 打包 css/images/html
 * 使用 ES6 + Babel 对原有代码进行了拆分和重构
@@ -89,7 +93,7 @@ $ npm install kline
 * OR ES6
 
 ```javascript
-    import {Kline} from 'kline';
+    import Kline from 'kline';
 ```
 
 

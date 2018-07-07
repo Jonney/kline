@@ -14,7 +14,7 @@ export class Control {
 
     static refreshFunction() {
         Control.refreshCounter++;
-        let lang = new ChartManager().getLanguage();
+        let lang = ChartManager.instance.getLanguage();
         if (Control.refreshCounter > 3600) {
             let num = Number(Control.refreshCounter / 3600);
             if (lang === "en-us") {
@@ -45,17 +45,17 @@ export class Control {
     static clearRefreshCounter() {
         window.clearInterval(Control.refreshHandler);
         Control.refreshCounter = 0;
-        let lang = new ChartManager().getLanguage();
+        let lang = ChartManager.instance.getLanguage();
         if (lang === "en-us") {
             $("#chart_updated_time_text").html(Control.refreshCounter + "s");
         } else {
             $("#chart_updated_time_text").html(Control.refreshCounter + "秒");
         }
-        Control.refreshHandler = setInterval(this.refreshFunction, Kline.instance.intervalTime);
+        Control.refreshHandler = setInterval(Control.refreshFunction, Kline.instance.intervalTime);
     }
 
     static requestData(showLoading) {
-        this.AbortRequest();
+        Control.AbortRequest();
         window.clearTimeout(Kline.instance.timer);
         if (Kline.instance.paused) {
             return;
@@ -64,9 +64,9 @@ export class Control {
             $("#chart_loading").addClass("activated");
         }
         if (Kline.instance.type === "stomp" && Kline.instance.stompClient) {
-            this.requestOverStomp();
+            Control.requestOverStomp();
         } else {
-            this.requestOverHttp();
+            Control.requestOverHttp();
         }
     }
 
@@ -146,7 +146,7 @@ export class Control {
         }
         $("#chart_loading").removeClass("activated");
 
-        let chart = new ChartManager().getChart();
+        let chart = ChartManager.instance.getChart();
         chart.setTitle();
         Kline.instance.data = eval(res.data);
 
@@ -157,7 +157,7 @@ export class Control {
 
         if (!updateDataRes) {
             if (Kline.instance.type === 'poll') {
-                Kline.instance.timer = setTimeout(RequestData, intervalTime);
+                Kline.instance.timer = setTimeout(Control.requestData, intervalTime);
             }
             return;
         }
@@ -174,7 +174,7 @@ export class Control {
             Kline.instance.timer = setTimeout(Control.TwoSecondThread, intervalTime);
         }
 
-        new ChartManager().redraw('All', false);
+        ChartManager.instance.redraw('All', false);
     }
 
     static AbortRequest() {
@@ -201,22 +201,22 @@ export class Control {
         ChartSettings.get();
         ChartSettings.save();
         let tmp = ChartSettings.get();
-        new ChartManager().setChartStyle('frame0.k0', tmp.charts.chartStyle);
+        ChartManager.instance.setChartStyle('frame0.k0', tmp.charts.chartStyle);
         let symbol = tmp.charts.symbol;
         if (!Kline.instance.init) {
             symbol = Kline.instance.symbol;
             Kline.instance.init = true;
         }
         Kline.instance.symbol = symbol;
-        this.switchSymbolSelected(symbol);
+        Control.switchSymbolSelected(symbol);
         let period = tmp.charts.period;
-        this.switchPeriod(period);
+        Control.switchPeriod(period);
         $('#chart_period_' + period + '_v a').addClass('selected');
         $('#chart_period_' + period + '_h a').addClass('selected');
         if (tmp.charts.indicsStatus === 'close') {
-            this.switchIndic('off');
+            Control.switchIndic('off');
         } else if (tmp.charts.indicsStatus === 'open') {
-            this.switchIndic('on');
+            Control.switchIndic('on');
         }
         let mainIndic = $('#chart_select_main_indicator');
         mainIndic.find('a').each(function () {
@@ -230,17 +230,17 @@ export class Control {
                 $(this).addClass('selected');
             }
         });
-        new ChartManager().getChart().setMainIndicator(tmp.charts.mIndic);
-        new ChartManager().setThemeName('frame0', tmp.theme);
-        this.switchTools('off');
+        ChartManager.instance.getChart().setMainIndicator(tmp.charts.mIndic);
+        ChartManager.instance.setThemeName('frame0', tmp.theme);
+        Control.switchTools('off');
         if (tmp.theme === 'Dark') {
-            this.switchTheme('dark');
+            Control.switchTheme('dark');
         } else if (tmp.theme === 'Light') {
-            this.switchTheme('light');
+            Control.switchTheme('light');
         } else if (tmp.theme === 'TradingView') {
             this.switchTheme('tradingview');
         }
-        this.chartSwitchLanguage(tmp.language || "zh-cn");
+        Control.chartSwitchLanguage(tmp.language || "zh-cn");
     }
 
 
@@ -258,28 +258,7 @@ export class Control {
 
     static refreshTemplate() {
         Kline.instance.chartMgr = DefaultTemplate.loadTemplate("frame0.k0", "");
-        new ChartManager().redraw('All', true);
-    }
-
-    static getRectCrossPt(rect, startPt, endPt) {
-        let crossPt;
-        let firstPt = {x: -1, y: -1};
-        let secondPt = {x: -1, y: -1};
-        let xdiff = endPt.x - startPt.x;
-        let ydiff = endPt.y - startPt.y;
-        if (Math.abs(xdiff) < 2) {
-            firstPt = {x: startPt.x, y: rect.top};
-            secondPt = {x: endPt.x, y: rect.bottom};
-            crossPt = [firstPt, secondPt];
-            return crossPt;
-        }
-        let k = ydiff / xdiff;
-        secondPt.x = rect.right;
-        secondPt.y = startPt.y + (rect.right - startPt.x) * k;
-        firstPt.x = rect.left;
-        firstPt.y = startPt.y + (rect.left - startPt.x) * k;
-        crossPt = [firstPt, secondPt];
-        return crossPt;
+        ChartManager.instance.redraw('All', true);
     }
 
     static chartSwitchLanguage(lang) {
@@ -298,8 +277,8 @@ export class Control {
             });
         });
         $("#chart_language_setting_div li a[name='" + lang + "']").addClass("selected");
-        new ChartManager().setLanguage(lang);
-        new ChartManager().getChart().setTitle();
+        ChartManager.instance.setLanguage(lang);
+        ChartManager.instance.getChart().setTitle();
         let tmp = ChartSettings.get();
         tmp.language = lang;
         ChartSettings.save();
@@ -364,7 +343,7 @@ export class Control {
         canvasGroup.css({
             left: canvasGroupRect.x + 'px',
             top: canvasGroupRect.y + 'px',
-            width: canvasGroupRect.w + 'px',
+            // width: canvasGroupRect.w + 'px',
             height: canvasGroupRect.h + 'px'
         });
         let mainCanvas = $('#chart_mainCanvas')[0];
@@ -439,13 +418,13 @@ export class Control {
             rowTheme.style.display = "none";
         }
 
-        new ChartManager().redraw('All', true);
+        ChartManager.instance.redraw('All', true);
         Kline.instance.onResize(width, height);
     }
 
     static mouseWheel(e, delta) {
-        new ChartManager().scale(delta > 0 ? 1 : -1);
-        new ChartManager().redraw("All", true);
+        ChartManager.instance.scale(delta > 0 ? 1 : -1);
+        ChartManager.instance.redraw("All", true);
         return false;
     }
 
@@ -468,13 +447,13 @@ export class Control {
 
         if (name === 'dark') {
             $(".trade_container").addClass("dark").removeClass("light");
-            new ChartManager().setThemeName('frame0', 'Dark');
+            ChartManager.instance.setThemeName('frame0', 'Dark');
             let tmp = ChartSettings.get();
             tmp.theme = 'Dark';
             ChartSettings.save();
         } else if (name === 'light') {
             $(".trade_container").addClass("light").removeClass("dark");
-            new ChartManager().setThemeName('frame0', 'Light');
+            ChartManager.instance.setThemeName('frame0', 'Light');
             let tmp = ChartSettings.get();
             tmp.theme = 'Light';
             ChartSettings.save();
@@ -491,7 +470,7 @@ export class Control {
         $('#chart_output_interface_text').val(JSON.stringify(a));
         $('#chart_output_interface_submit').submit();
         new MEvent().raise(name);
-        new ChartManager().redraw();
+        ChartManager.instance.redraw();
 
         Kline.instance.onThemeChange(name);
     }
@@ -508,9 +487,9 @@ export class Control {
                 }
             });
             $('#chart_toolpanel')[0].style.display = 'inline';
-            if (new ChartManager()._drawingTool === ChartManager.DrawingTool.Cursor) {
+            if (ChartManager.instance._drawingTool === ChartManager.DrawingTool.Cursor) {
                 $('#chart_Cursor').parent().addClass('selected');
-            } else if (new ChartManager()._drawingTool === ChartManager.DrawingTool.CrossCursor) {
+            } else if (ChartManager.instance._drawingTool === ChartManager.DrawingTool.CrossCursor) {
                 $('#chart_CrossCursor').parent().addClass('selected');
             }
         } else if (name === 'off') {
@@ -521,8 +500,8 @@ export class Control {
                 }
             });
             $('#chart_toolpanel')[0].style.display = 'none';
-            new ChartManager().setRunningMode(new ChartManager()._beforeDrawingTool);
-            new ChartManager().redraw("All", true);
+            ChartManager.instance.setRunningMode(ChartManager.instance._beforeDrawingTool);
+            ChartManager.instance.redraw("All", true);
         }
         if (Kline.instance.isSized) {
             Control.onSize();
@@ -541,9 +520,9 @@ export class Control {
             ChartSettings.save();
             let value = tmp.charts.indics[1];
             if (Template.displayVolume === false)
-                new ChartManager().getChart().setIndicator(2, value);
+                ChartManager.instance.getChart().setIndicator(2, value);
             else
-                new ChartManager().getChart().setIndicator(2, value);
+                ChartManager.instance.getChart().setIndicator(2, value);
             $("#chart_tabbar").find('a').each(function () {
                 if ($(this).attr('name') === value)
                     $(this).addClass('selected');
@@ -551,7 +530,7 @@ export class Control {
             $('#chart_tabbar')[0].style.display = 'block';
         } else if (name === 'off') {
             $('#chart_show_indicator').removeClass('selected');
-            new ChartManager().getChart().setIndicator(2, 'NONE');
+            ChartManager.instance.getChart().setIndicator(2, 'NONE');
             let tmp = ChartSettings.get();
             tmp.charts.indicsStatus = 'close';
             ChartSettings.save();
@@ -578,21 +557,21 @@ export class Control {
                 $(this).addClass('selected');
             }
         });
-        new ChartManager().showCursor();
+        ChartManager.instance.showCursor();
         Control.calcPeriodWeight(name);
         if (name === 'line') {
-            new ChartManager().getChart().strIsLine = true;
-            new ChartManager().setChartStyle('frame0.k0', 'Line');
-            new ChartManager().getChart().setCurrentPeriod('line');
+            ChartManager.instance.getChart().strIsLine = true;
+            ChartManager.instance.setChartStyle('frame0.k0', 'Line');
+            ChartManager.instance.getChart().setCurrentPeriod('line');
             let settings = ChartSettings.get();
             settings.charts.period = name;
             ChartSettings.save();
             return;
         }
-        new ChartManager().getChart().strIsLine = false;
+        ChartManager.instance.getChart().strIsLine = false;
         let p = Kline.instance.tagMapPeriod[name];
-        new ChartManager().setChartStyle('frame0.k0', ChartSettings.get().charts.chartStyle);
-        new ChartManager().getChart().setCurrentPeriod(p);
+        ChartManager.instance.setChartStyle('frame0.k0', ChartSettings.get().charts.chartStyle);
+        ChartManager.instance.getChart().setCurrentPeriod(p);
         let settings = ChartSettings.get();
         settings.charts.period = name;
         ChartSettings.save();
@@ -610,7 +589,7 @@ export class Control {
         Control.reset(symbol);
         $(".market_chooser ul a").removeClass("selected");
         $(".market_chooser ul a[name='" + symbol + "']").addClass("selected");
-        new ChartManager().getChart()._symbol = symbol;
+        ChartManager.instance.getChart()._symbol = symbol;
         let settings = ChartSettings.get();
         settings.charts.symbol = symbol;
         ChartSettings.save();
@@ -625,13 +604,13 @@ export class Control {
         Control.switchSymbolSelected(symbol);
         let settings = ChartSettings.get();
         if (settings.charts.period === "line") {
-            new ChartManager().getChart().strIsLine = true;
-            new ChartManager().setChartStyle('frame0.k0', 'Line');
+            ChartManager.instance.getChart().strIsLine = true;
+            ChartManager.instance.setChartStyle('frame0.k0', 'Line');
         } else {
-            new ChartManager().getChart().strIsLine = false;
-            new ChartManager().setChartStyle('frame0.k0', ChartSettings.get().charts.chartStyle);
+            ChartManager.instance.getChart().strIsLine = false;
+            ChartManager.instance.setChartStyle('frame0.k0', ChartSettings.get().charts.chartStyle);
         }
-        new ChartManager().getChart().setSymbol(symbol);
+        ChartManager.instance.getChart().setSymbol(symbol);
     }
 
     static calcPeriodWeight(period) {
@@ -653,15 +632,15 @@ export class Control {
     }
 
     static socketConnect() {
-        Kline.instance.socketConnected = true;
 
-        if (!Kline.instance.stompClient) {
+        if (!Kline.instance.stompClient || !Kline.instance.socketConnected) {
             if (Kline.instance.enableSockjs) {
                 let socket = new SockJS(Kline.instance.url);
                 Kline.instance.stompClient = Stomp.over(socket);
             } else {
                 Kline.instance.stompClient = Stomp.client(Kline.instance.url);
             }
+            Kline.instance.socketConnected = true;
         }
 
         if (Kline.instance.stompClient.ws.readyState === 1) {

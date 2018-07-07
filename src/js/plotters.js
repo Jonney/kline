@@ -1,11 +1,13 @@
-import {NamedObject} from './named_object'
-import * as themes from './themes'
-import {ChartManager} from './chart_manager'
 import Kline from './kline'
-import * as exprs from './exprs'
+import {NamedObject} from './named_object'
+import {ChartManager} from './chart_manager'
 import {Util} from './util'
+import {CPoint} from './cpoint'
+import * as exprs from './exprs'
+import * as themes from './themes'
 import * as data_providers from './data_providers'
 import * as data_sources from './data_sources'
+import * as ctools from './ctools'
 
 
 export class Plotter extends NamedObject {
@@ -15,7 +17,6 @@ export class Plotter extends NamedObject {
     constructor(name) {
         super(name);
     }
-
 
     static drawLine(context, x1, y1, x2, y2) {
         context.beginPath();
@@ -128,7 +129,7 @@ export class BackgroundPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let theme = mgr.getTheme(this.getFrameName());
         context.fillStyle = theme.getColor(this._color);
@@ -145,7 +146,7 @@ export class MainAreaBackgroundPlotter extends BackgroundPlotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let range = mgr.getRange(this.getAreaName());
@@ -172,7 +173,7 @@ export class RangeAreaBackgroundPlotter extends BackgroundPlotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let areaName = this.getAreaName();
         let area = mgr.getArea(areaName);
         let range = mgr.getRange(areaName.substring(0, areaName.lastIndexOf("Range")));
@@ -195,7 +196,7 @@ export class TimelineAreaBackgroundPlotter extends BackgroundPlotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         if (!area.isChanged() && !timeline.isUpdated())
@@ -215,7 +216,7 @@ export class CGridPlotter extends NamedObject {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let range = mgr.getRange(this.getAreaName());
@@ -261,7 +262,7 @@ export class CandlestickPlotter extends NamedObject {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let ds = mgr.getDataSource(this.getDataSourceName());
         if (ds.getDataCount() < 1) {
             return;
@@ -477,7 +478,7 @@ export class CandlestickHLCPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let ds = mgr.getDataSource(this.getDataSourceName());
         if (!Util.isInstance(ds, data_sources.MainDataSource) || ds.getDataCount() < 1) {
             return;
@@ -594,7 +595,7 @@ export class OHLCPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let ds = mgr.getDataSource(this.getDataSourceName());
         if (!Util.isInstance(ds, data_sources.MainDataSource) || ds.getDataCount() < 1) {
             return;
@@ -676,7 +677,7 @@ export class MainInfoPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let ds = mgr.getDataSource(this.getDataSourceName());
@@ -725,9 +726,9 @@ export class MainInfoPlotter extends Plotter {
                 + '  收: ' + data.close.toFixed(digits)
             );
         } else if (lang === "en-us") {
-            if (!Plotter.drawString(context, 'DATE: ' +
-                    year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
-                return;
+            // if (!Plotter.drawString(context, 'DATE: ' +
+            //         year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
+            //     return;
             if (!Plotter.drawString(context, '  O: ' + data.open.toFixed(digits), rect))
                 return;
             if (!Plotter.drawString(context, '  H: ' + data.high.toFixed(digits), rect))
@@ -737,9 +738,9 @@ export class MainInfoPlotter extends Plotter {
             if (!Plotter.drawString(context, '  C: ' + data.close.toFixed(digits), rect))
                 return;
         } else if (lang === "zh-tw") {
-            if (!Plotter.drawString(context, '時間: ' +
-                    year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
-                return;
+            // if (!Plotter.drawString(context, '時間: ' +
+            //         year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
+            //     return;
             if (!Plotter.drawString(context, '  開: ' + data.open.toFixed(digits), rect))
                 return;
             if (!Plotter.drawString(context, '  高: ' + data.high.toFixed(digits), rect))
@@ -809,16 +810,16 @@ export class MainInfoPlotter extends Plotter {
             if (!Plotter.drawString(context, '  AMPLITUDE: ' + amplitude.toFixed(2) + ' %', rect)) {
                 return;
             }
-            if (!Plotter.drawString(context, '  V: ' + data.volume.toFixed(2), rect)) {
-                return;
-            }
+            // if (!Plotter.drawString(context, '  V: ' + data.volume.toFixed(2), rect)) {
+            //     return;
+            // }
         } else if (lang === "zh-tw") {
             if (!Plotter.drawString(context, '  振幅: ' + amplitude.toFixed(2) + ' %', rect)) {
                 return;
             }
-            if (!Plotter.drawString(context, '  量: ' + data.volume.toFixed(2), rect)) {
-                return;
-            }
+            // if (!Plotter.drawString(context, '  量: ' + data.volume.toFixed(2), rect)) {
+            //     return;
+            // }
         }
         let dp = mgr.getDataProvider(this.getAreaName() + ".secondary");
         if (dp === undefined) {
@@ -854,7 +855,7 @@ export class IndicatorPlotter extends NamedObject {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let range = mgr.getRange(this.getAreaName());
@@ -1053,7 +1054,7 @@ export class IndicatorInfoPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let dp = mgr.getDataProvider(this.getAreaName() + ".secondary");
@@ -1135,7 +1136,7 @@ export class MinMaxPlotter extends NamedObject {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let ds = mgr.getDataSource(this.getDataSourceName());
         if (ds.getDataCount() < 1)
             return;
@@ -1226,8 +1227,7 @@ export class TimelinePlotter extends Plotter {
 
     Draw(context) {
 
-
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         if (!area.isChanged() && !timeline.isUpdated())
@@ -1327,14 +1327,14 @@ export class RangePlotter extends NamedObject {
     }
 
     getRequiredWidth(context, v) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let theme = mgr.getTheme(this.getFrameName());
         context.font = theme.getFont(themes.Theme.Font.Default);
         return context.measureText((Math.floor(v) + 0.88).toString()).width + 16;
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let areaName = this.getAreaName();
         let area = mgr.getArea(areaName);
         let rangeName = areaName.substring(0, areaName.lastIndexOf("Range"));
@@ -1381,7 +1381,7 @@ export class COrderGraphPlotter extends NamedObject {
         super(name);
     }
 
-    Draw = function (context) {
+    Draw(context) {
         return this._Draw_(context);
     }
 
@@ -1395,7 +1395,7 @@ export class COrderGraphPlotter extends NamedObject {
         context.save();
         context.rect(this.m_left, this.m_top, this.m_right - this.m_left, this.m_bottom - this.m_top);
         context.clip();
-        let all = new ChartManager().getChart()._depthData;
+        let all = ChartManager.instance.getChart()._depthData;
         this.x_offset = 0;
         this.y_offset = 0;
         let ask_tmp = {};
@@ -1419,7 +1419,7 @@ export class COrderGraphPlotter extends NamedObject {
     DrawBackground(context) {
         context.fillStyle = this.m_pTheme.getColor(themes.Theme.Color.Background);
         context.fillRect(this.m_left, this.m_top, this.m_right - this.m_left, this.m_bottom - this.m_top);
-        let all = new ChartManager().getChart()._depthData;
+        let all = ChartManager.instance.getChart()._depthData;
         if (this.m_mode === 0) {
             let ask_bottom = this.m_pRange.toY(all.array[this.m_ask_si].rate) - this.y_offset;
             let bid_top = this.m_pRange.toY(all.array[this.m_bid_si].rate) + this.y_offset;
@@ -1470,7 +1470,7 @@ export class COrderGraphPlotter extends NamedObject {
     }
 
     UpdatePoints() {
-        let all = new ChartManager().getChart()._depthData;
+        let all = ChartManager.instance.getChart()._depthData;
         this.m_ask_points = [];
         let index_ask = {};
         index_ask.x = Math.floor(this.m_left);
@@ -1524,7 +1524,7 @@ export class COrderGraphPlotter extends NamedObject {
     }
 
     updateData() {
-        let all = new ChartManager().getChart()._depthData;
+        let all = ChartManager.instance.getChart()._depthData;
         if (all.array === null) return false;
         if (all.array.length <= 50) return false;
         let minRange = this.m_pRange.getOuterMinValue();
@@ -1592,7 +1592,7 @@ export class COrderGraphPlotter extends NamedObject {
     }
 
     Update() {
-        this.m_pMgr = new ChartManager();
+        this.m_pMgr = ChartManager.instance;
         let areaName = this.getAreaName();
         this.m_pArea = this.m_pMgr.getArea(areaName);
         if (this.m_pArea === null)
@@ -1609,7 +1609,7 @@ export class COrderGraphPlotter extends NamedObject {
     }
 
     DrawGradations(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let areaName = this.getAreaName();
         let area = mgr.getArea(areaName);
         let rangeName = areaName.substring(0, areaName.lastIndexOf("Range"));
@@ -1675,7 +1675,7 @@ export class COrderGraphPlotter extends NamedObject {
 
     DrawTickerGraph(context) {
         // return;
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let ds = mgr.getDataSource(this.getDataSourceName());
         let ticker = ds._dataItems[ds._dataItems.length - 1].close;
         let p1x = this.m_left + 1;
@@ -1697,7 +1697,7 @@ export class LastVolumePlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let areaName = this.getAreaName();
         let area = mgr.getArea(areaName);
@@ -1733,7 +1733,7 @@ export class LastClosePlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let timeline = mgr.getTimeline(this.getDataSourceName());
         let areaName = this.getAreaName();
         let area = mgr.getArea(areaName);
@@ -1776,7 +1776,7 @@ export class SelectionPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         if (mgr._drawingTool !== ChartManager.DrawingTool.CrossCursor) {
             return;
         }
@@ -1825,7 +1825,7 @@ export class TimelineSelectionPlotter extends Plotter {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
         if (timeline.getSelectedIndex() < 0)
@@ -1896,7 +1896,7 @@ export class RangeSelectionPlotter extends NamedObject {
     }
 
     Draw(context) {
-        let mgr = new ChartManager();
+        let mgr = ChartManager.instance;
         let areaName = this.getAreaName();
         let area = mgr.getArea(areaName);
         let timeline = mgr.getTimeline(this.getDataSourceName());
@@ -1949,7 +1949,7 @@ export class CToolPlotter extends NamedObject {
     constructor(name, toolObject) {
         super(name);
         this.toolObject = toolObject;
-        let pMgr = new ChartManager();
+        let pMgr = ChartManager.instance;
         let pArea = pMgr.getArea('frame0.k0.main');
         if (pArea === null) {
             this.areaPos = {
@@ -1971,7 +1971,7 @@ export class CToolPlotter extends NamedObject {
         this.selectedSize = 6;
         this.cursorLen = 4;
         this.cursorGapLen = 3;
-        this.theme = new ChartManager().getTheme(this.getFrameName());
+        this.theme = ChartManager.instance.getTheme(this.getFrameName());
     }
 
     drawCursor(context) {
@@ -2034,7 +2034,7 @@ export class CToolPlotter extends NamedObject {
         this.getAreaPos();
         let tempStartPt = {x: startPoint.x, y: startPoint.y};
         let tempEndPt = {x: endPoint.x, y: endPoint.y};
-        let crossPt = getRectCrossPt(this.areaPos, tempStartPt, tempEndPt);
+        let crossPt = this.getRectCrossPt(this.areaPos, tempStartPt, tempEndPt);
         let tempCrossPt;
         if (endPoint.x === startPoint.x) {
             if (endPoint.y === startPoint.y) {
@@ -2071,7 +2071,7 @@ export class CToolPlotter extends NamedObject {
     }
 
     getAreaPos() {
-        let pMgr = new ChartManager();
+        let pMgr = ChartManager.instance;
         let pArea = pMgr.getArea('frame0.k0.main');
         if (pArea === null) {
             this.areaPos = {
@@ -2129,7 +2129,7 @@ export class DrawStraightLinesPlotter extends CToolPlotter {
         if (this.startPoint.x === this.endPoint.x && this.startPoint.y === this.endPoint.y) {
             Plotter.drawLine(context, this.areaPos.left, this.startPoint.y, this.areaPos.right, this.startPoint.y);
         } else {
-            this.crossPt = getRectCrossPt(this.areaPos, this.startPoint, this.endPoint);
+            this.crossPt = this.getRectCrossPt(this.areaPos, this.startPoint, this.endPoint);
             Plotter.drawLine(context, this.crossPt[0].x, this.crossPt[0].y, this.crossPt[1].x, this.crossPt[1].y);
         }
     }
@@ -2383,9 +2383,9 @@ export class DrawBiParallelLinesPlotter extends ParallelLinesPlotter {
         this.endPoint = this.ctrlPts[1][2];
         this.getParaPt();
         this.getAreaPos();
-        this.crossPt0 = getRectCrossPt(this.areaPos, this.startPoint, this.endPoint);
+        this.crossPt0 = this.getRectCrossPt(this.areaPos, this.startPoint, this.endPoint);
         Plotter.drawLine(context, this.crossPt0[0].x, this.crossPt0[0].y, this.crossPt0[1].x, this.crossPt0[1].y);
-        this.crossPt1 = getRectCrossPt(this.areaPos, this.paraStartPoint, this.paraEndPoint);
+        this.crossPt1 = this.getRectCrossPt(this.areaPos, this.paraStartPoint, this.paraEndPoint);
         Plotter.drawLine(context, this.crossPt1[0].x, this.crossPt1[0].y, this.crossPt1[1].x, this.crossPt1[1].y);
     }
 
@@ -2451,11 +2451,11 @@ export class DrawTriParallelLinesPlotter extends ParallelLinesPlotter {
         this.para2EndPoint.x = this.endPoint.x - vectorB[0];
         this.para2EndPoint.y = this.endPoint.y - vectorB[1];
         this.getAreaPos();
-        this.crossPt0 = getRectCrossPt(this.areaPos, this.startPoint, this.endPoint);
+        this.crossPt0 = this.getRectCrossPt(this.areaPos, this.startPoint, this.endPoint);
         Plotter.drawLine(context, this.crossPt0[0].x, this.crossPt0[0].y, this.crossPt0[1].x, this.crossPt0[1].y);
-        this.crossPt1 = getRectCrossPt(this.areaPos, this.paraStartPoint, this.para1EndPoint);
+        this.crossPt1 = this.getRectCrossPt(this.areaPos, this.paraStartPoint, this.para1EndPoint);
         Plotter.drawLine(context, this.crossPt1[0].x, this.crossPt1[0].y, this.crossPt1[1].x, this.crossPt1[1].y);
-        this.crossPt2 = getRectCrossPt(this.areaPos, this.para2StartPoint, this.para2EndPoint);
+        this.crossPt2 = this.getRectCrossPt(this.areaPos, this.para2StartPoint, this.para2EndPoint);
         Plotter.drawLine(context, this.crossPt2[0].x, this.crossPt2[0].y, this.crossPt2[1].x, this.crossPt2[1].y);
     }
 
@@ -2477,7 +2477,7 @@ export class BandLinesPlotter extends CToolPlotter {
         context.textAlign = "left";
         context.fillStyle = this.theme.getColor(themes.Theme.Color.LineColorNormal);
         let text;
-        if (this.toolObject.state === CToolObject.state.Draw) {
+        if (this.toolObject.state === ctools.CToolObject.state.Draw) {
             this.startPtValue = this.toolObject.getPoint(0).getPosIV().v;
             this.endPtValue = this.toolObject.getPoint(1).getPosIV().v;
         }
@@ -2560,11 +2560,11 @@ export class CDynamicLinePlotter extends NamedObject {
     constructor(name) {
         super(name);
         this.flag = true;
-        this.context = new ChartManager()._overlayContext;
+        this.context = ChartManager.instance._overlayContext;
     }
 
     getAreaPos() {
-        let pMgr = new ChartManager();
+        let pMgr = ChartManager.instance;
         let pArea = pMgr.getArea('frame0.k0.main');
         if (pArea === null) {
             this.areaPos = {
@@ -2585,7 +2585,7 @@ export class CDynamicLinePlotter extends NamedObject {
 
     Draw(context) {
         this.getAreaPos();
-        let pMgr = new ChartManager();
+        let pMgr = ChartManager.instance;
         let pTDP = pMgr.getDataSource(this.getDataSourceName());
         if (pTDP === null || !Util.isInstance(pTDP, data_sources.MainDataSource))
             return;
@@ -2597,16 +2597,16 @@ export class CDynamicLinePlotter extends NamedObject {
             let toolObject = pTDP.getToolObject(i);
             let state = toolObject.getState();
             switch (state) {
-                case CToolObject.state.BeforeDraw:
-                    toolObject.getPlotter().theme = new ChartManager().getTheme(this.getFrameName());
+                case ctools.CToolObject.state.BeforeDraw:
+                    toolObject.getPlotter().theme = ChartManager.instance.getTheme(this.getFrameName());
                     toolObject.getPlotter().drawCursor(this.context);
                     break;
-                case CToolObject.state.Draw:
-                    toolObject.getPlotter().theme = new ChartManager().getTheme(this.getFrameName());
+                case ctools.CToolObject.state.Draw:
+                    toolObject.getPlotter().theme = ChartManager.instance.getTheme(this.getFrameName());
                     toolObject.getPlotter().updateDraw(this.context);
                     break;
-                case CToolObject.state.AfterDraw:
-                    toolObject.getPlotter().theme = new ChartManager().getTheme(this.getFrameName());
+                case ctools.CToolObject.state.AfterDraw:
+                    toolObject.getPlotter().theme = ChartManager.instance.getTheme(this.getFrameName());
                     toolObject.getPlotter().finishDraw(this.context);
                     break;
                 default:
@@ -2614,7 +2614,7 @@ export class CDynamicLinePlotter extends NamedObject {
             }
         }
         let sel = pTDP.getSelectToolObjcet();
-        if (sel !== null && sel !== CToolObject.state.Draw)
+        if (sel !== null && sel !== ctools.CToolObject.state.Draw)
             sel.getPlotter().highlight(this.context);
         this.context.restore();
 

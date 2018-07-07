@@ -5,7 +5,7 @@ import {ChartSettings} from './chart_settings'
 import {Template} from './templates'
 import '../css/main.css'
 import tpl from '../view/tpl.html'
-import './firebase'
+import fire from './firebase'
 import $ from 'jquery'
 
 
@@ -47,6 +47,7 @@ export default class Kline {
         this.isSized = false;
         this.paused = false;
         this.subscribed = null;
+        this.disableFirebase = false;
 
         this.periodMap = {
             "01w": 7 * 86400 * 1000,
@@ -97,7 +98,8 @@ export default class Kline {
      *********************************************/
 
     draw() {
-        new KlineTrade();
+        Kline.trade = new KlineTrade();
+        Kline.chartMgr = new ChartManager();
 
         let view = $.parseHTML(tpl);
         for (let k in this.ranges) {
@@ -113,10 +115,13 @@ export default class Kline {
             Control.socketConnect();
         }
 
+        if (!this.disableFirebase) {
+            fire();
+        }
+
         this.registerMouseEvent();
-        let chartManager = new ChartManager();
-        chartManager.bindCanvas("main", document.getElementById("chart_mainCanvas"));
-        chartManager.bindCanvas("overlay", document.getElementById("chart_overlayCanvas"));
+        ChartManager.instance.bindCanvas("main", document.getElementById("chart_mainCanvas"));
+        ChartManager.instance.bindCanvas("overlay", document.getElementById("chart_overlayCanvas"));
         Control.refreshTemplate();
         Control.onSize(this.width, this.height);
         Control.readCookie();
@@ -376,9 +381,9 @@ export default class Kline {
                     tmp.charts.indics[1] = name;
                     ChartSettings.save();
                     if (Template.displayVolume === false)
-                        new ChartManager().getChart().setIndicator(1, name);
+                        ChartManager.instance.getChart().setIndicator(1, name);
                     else
-                        new ChartManager().getChart().setIndicator(2, name);
+                        ChartManager.instance.getChart().setIndicator(2, name);
                 });
             $("#chart_select_chart_style a")
                 .click(function () {
@@ -387,7 +392,7 @@ export default class Kline {
                     let tmp = ChartSettings.get();
                     tmp.charts.chartStyle = $(this)[0].innerHTML;
                     ChartSettings.save();
-                    let mgr = new ChartManager();
+                    let mgr = ChartManager.instance;
                     mgr.setChartStyle("frame0.k0", $(this).html());
                     mgr.redraw();
                 });
@@ -408,7 +413,7 @@ export default class Kline {
                     let tmp = ChartSettings.get();
                     tmp.charts.mIndic = name;
                     ChartSettings.save();
-                    let mgr = new ChartManager();
+                    let mgr = ChartManager.instance;
                     if (!mgr.setMainIndicator("frame0.k0", name))
                         mgr.removeMainIndicator("frame0.k0");
                     mgr.redraw();
@@ -459,24 +464,24 @@ export default class Kline {
             });
             $(document).keyup(function (e) {
                 if (e.keyCode === 46) {
-                    new ChartManager().deleteToolObject();
-                    new ChartManager().redraw('OverlayCanvas', false);
+                    ChartManager.instance.deleteToolObject();
+                    ChartManager.instance.redraw('OverlayCanvas', false);
                 }
             });
             $("#clearCanvas").click(function () {
-                let pDPTool = new ChartManager().getDataSource("frame0.k0");
+                let pDPTool = ChartManager.instance.getDataSource("frame0.k0");
                 let len = pDPTool.getToolObjectCount();
                 for (let i = 0; i < len; i++) {
                     pDPTool.delToolObject();
                 }
-                new ChartManager().redraw('OverlayCanvas', false);
+                ChartManager.instance.redraw('OverlayCanvas', false);
             });
             $("#chart_overlayCanvas")
                 .mousemove(function (e) {
                     let r = e.target.getBoundingClientRect();
                     let x = e.clientX - r.left;
                     let y = e.clientY - r.top;
-                    let mgr = new ChartManager();
+                    let mgr = ChartManager.instance;
                     if (Kline.instance.buttonDown === true) {
                         mgr.onMouseMove("frame0", x, y, true);
                         mgr.redraw("All", false);
@@ -489,7 +494,7 @@ export default class Kline {
                     let r = e.target.getBoundingClientRect();
                     let x = e.clientX - r.left;
                     let y = e.clientY - r.top;
-                    let mgr = new ChartManager();
+                    let mgr = ChartManager.instance;
                     mgr.onMouseLeave("frame0", x, y, false);
                     mgr.redraw("OverlayCanvas");
                 })
@@ -501,27 +506,27 @@ export default class Kline {
                     let r = e.target.getBoundingClientRect();
                     let x = e.clientX - r.left;
                     let y = e.clientY - r.top;
-                    let mgr = new ChartManager();
+                    let mgr = ChartManager.instance;
                     mgr.onMouseUp("frame0", x, y);
                     mgr.redraw("All");
                 })
                 .mousedown(function (e) {
                     if (e.which !== 1) {
-                        new ChartManager().deleteToolObject();
-                        new ChartManager().redraw('OverlayCanvas', false);
+                        ChartManager.instance.deleteToolObject();
+                        ChartManager.instance.redraw('OverlayCanvas', false);
                         return;
                     }
                     Kline.instance.buttonDown = true;
                     let r = e.target.getBoundingClientRect();
                     let x = e.clientX - r.left;
                     let y = e.clientY - r.top;
-                    new ChartManager().onMouseDown("frame0", x, y);
+                    ChartManager.instance.onMouseDown("frame0", x, y);
                 });
             $("#chart_parameter_settings :input").change(function () {
                 let name = $(this).attr("name");
                 let index = 0;
                 let valueArray = [];
-                let mgr = new ChartManager();
+                let mgr = ChartManager.instance;
                 $("#chart_parameter_settings :input").each(function () {
                     if ($(this).attr("name") === name) {
                         if ($(this).val() !== "" && $(this).val() !== null && $(this).val() !== undefined) {
@@ -554,7 +559,7 @@ export default class Kline {
             $("#chart_parameter_settings button").click(function () {
                 let name = $(this).parents("tr").children("th").html();
                 let index = 0;
-                let value = new ChartManager().getIndicatorParameters(name);
+                let value = ChartManager.instance.getIndicatorParameters(name);
                 let valueArray = [];
                 $(this).parent().prev().children('input').each(function () {
                     if (value !== null && index < value.length) {
@@ -563,11 +568,11 @@ export default class Kline {
                     }
                     index++;
                 });
-                new ChartManager().setIndicatorParameters(name, valueArray);
+                ChartManager.instance.setIndicatorParameters(name, valueArray);
                 let tmp = ChartSettings.get();
                 tmp.indics[name] = valueArray;
                 ChartSettings.save();
-                new ChartManager().redraw('All', false);
+                ChartManager.instance.redraw('All', false);
             });
 
 
