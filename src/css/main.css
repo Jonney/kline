@@ -1265,10 +1265,11 @@ body {
 .chart_container.tradingview #chart_toolbar {
     color:#4c525e;
     font-weight:bold;
-    font-size: 14px;
+    font-size: 16px;
     background-color:#fff;
     border-bottom:3px solid #e7ebee;
     border-radius:0 0 7px 7px;
+    padding-top:4px;
 }
 
 .chart_container.tradingview .chart_toolbar_tabgroup li a:hover {
@@ -1280,9 +1281,9 @@ body {
 }
 
 #chart_main_info {
-    font-color:#4c525e;
+    color:#4c525e;
     position: absolute;
-    margin: 4px 8px;
-    font-size: 14px;
+    margin: 8px 12px;
+    font-size: 12px;
     font-family: 微软雅黑;
 }
