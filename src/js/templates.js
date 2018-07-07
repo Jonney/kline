@@ -50,7 +50,7 @@ export class Template {
         mgr.setMainIndicator(dsName, "MA");
         let range = new ranges.MainRange(areaName);
         mgr.setRange(range.getName(), range);
-        range.setPaddingTop(28);
+        range.setPaddingTop(36);
         range.setPaddingBottom(12);
         let plotter = new plotters.MainAreaBackgroundPlotter(areaName + ".background");
         mgr.setPlotter(plotter.getName(), plotter);
