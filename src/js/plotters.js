@@ -250,6 +250,9 @@ export class CGridPlotter extends NamedObject {
         if (clipped) {
             context.restore();
         }
+        
+        let plotter = mgr.getPlotter(this.getDataSourceName() + ".timeline.main");
+        plotter.DrawGrid(context);
     }
 
 }
@@ -1226,7 +1229,6 @@ export class TimelinePlotter extends Plotter {
     }
 
     Draw(context) {
-
         let mgr = ChartManager.instance;
         let area = mgr.getArea(this.getAreaName());
         let timeline = mgr.getTimeline(this.getDataSourceName());
@@ -1314,6 +1316,61 @@ export class TimelinePlotter extends Plotter {
             context.fillStyle = theme.getColor(themes.Theme.Color.Grid1);
             Plotter.createRectangles(context, gridRects);
             context.fill();
+        }
+    }
+
+    DrawGrid(context) {
+        let mgr = ChartManager.instance;
+        let area = mgr.getArea(this.getAreaName());
+        let timeline = mgr.getTimeline(this.getDataSourceName());
+        if (!area.isChanged() && !timeline.isUpdated())
+            return;
+        let ds = mgr.getDataSource(this.getDataSourceName());
+        if (ds.getDataCount() < 2)
+            return;
+        let timeInterval = ds.getDataAt(1).date - ds.getDataAt(0).date;
+        let n, cnt = TimelinePlotter.TIME_INTERVAL.length;
+        for (n = 0; n < cnt; n++) {
+            if (timeInterval < TimelinePlotter.TIME_INTERVAL[n])
+                break;
+        }
+        for (; n < cnt; n++) {
+            if (TimelinePlotter.TIME_INTERVAL[n] % timeInterval === 0)
+                if ((TimelinePlotter.TIME_INTERVAL[n] / timeInterval) * timeline.getColumnWidth() > 60)
+                    break;
+        }
+        let first = timeline.getFirstIndex();
+        let last = timeline.getLastIndex();
+        let d = new Date();
+        let local_utc_diff = d.getTimezoneOffset() * 60 * 1000;
+        let theme = mgr.getTheme(this.getFrameName());
+        let top = area.getTop();
+        for (let i = first; i < last; i++) {
+            let utcDate = ds.getDataAt(i).date;
+            let localDate = utcDate - local_utc_diff;
+            let time = new Date(utcDate);
+            let year = time.getFullYear();
+            let month = time.getMonth() + 1;
+            let date = time.getDate();
+            let hour = time.getHours();
+            let minute = time.getMinutes();
+            let draw = false;
+            if (n < cnt) {
+                let m = Math.max(
+                    TimelinePlotter.TP_DAY,
+                    TimelinePlotter.TIME_INTERVAL[n]);
+                if (localDate % m === 0) {
+                    draw = true;
+                } else if (localDate % TimelinePlotter.TIME_INTERVAL[n] === 0) {
+                    draw = true;
+                }
+            } else if (date === 1 && (hour < (timeInterval / TimelinePlotter.TP_HOUR))) {
+                draw = true;
+            }
+            if (draw) {
+                let x = timeline.toItemCenter(i);
+                Plotter.drawLine(context, x, 0, x, top);
+            }
         }
     }
 
