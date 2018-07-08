@@ -585,10 +585,14 @@ export default class Kline {
                         clearInterval(interval);
                     }else{
                         timeLine.startMove();
-                        timeLine.move(-1*(++moveCount)*moveCount);
+                        var speed=(++moveCount)*moveCount;
+                        if(speed>600){
+                            speed=600;
+                        }
+                        timeLine.move(-1*speed);
                         mgr.redraw('All',false);
                     }
-                },50);
+                },33);
             });
 
 
