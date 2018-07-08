@@ -206,7 +206,7 @@ export class TradingViewTheme extends Theme {
         this._colors[Theme.Color.Text3] = "#666";
         this._colors[Theme.Color.Text4] = "#444";
         this._colors[Theme.Color.Text5] = "#fff";
-        this._colors[Theme.Color.LineColorNormal] = "#000080";
+        this._colors[Theme.Color.LineColorNormal] = "#0000EE";
         this._colors[Theme.Color.LineColorSelected] = "#0000AA";
         this._colors[Theme.Color.CircleColorFill] = "#ffffff";
         this._colors[Theme.Color.CircleColorStroke] = "#666666";

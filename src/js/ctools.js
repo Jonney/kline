@@ -844,3 +844,31 @@ export class CArrowLineObject extends CSegLineObject {
 
 }
 
+
+export class NObject extends CToolObject {
+
+    constructor(name) {
+        super(name);
+        this.addPoint(new CPoint(name));
+        this.addPoint(new CPoint(name));
+        this.addPoint(new CPoint(name));
+        this.addPoint(new CPoint(name));
+        this.drawer = new plotters.DrawNPlotter(name, this);
+    }
+    
+    setPosIV(aX, aY, bX, bY, cX, cY, dX, dY) {
+        this.getPoint(0).setPosIV(aX, aY);
+        this.getPoint(1).setPosIV(bX, bY);
+        this.getPoint(2).setPosIV(cX, cY);
+        this.getPoint(3).setPosIV(dX, dY);
+        this.getPoint(0).setState(CPoint.state.Show);
+        this.getPoint(1).setState(CPoint.state.Show);
+        this.getPoint(2).setState(CPoint.state.Show);
+        this.getPoint(3).setState(CPoint.state.Show);
+        this.setState(CToolObject.state.AfterDraw);
+    }
+    
+    isSelected(x, y) {
+        return false;
+    }
+}

@@ -2148,27 +2148,27 @@ export class CToolPlotter extends NamedObject {
     }
 
     updateDraw(context) {
-        context.lineWidth=0.5;
+        //context.lineWidth=0.5;
         context.strokeStyle = this.theme.getColor(themes.Theme.Color.LineColorNormal);
         this.draw(context);
         this.drawCtrlPt(context);
-        context.lineWidth=1;
+        //context.lineWidth=1;
     }
 
     finishDraw(context) {
-        context.lineWidth=0.5;
+        //context.lineWidth=0.5;
         context.strokeStyle = this.theme.getColor(themes.Theme.Color.LineColorNormal);
         this.draw(context);
-        context.lineWidth=1;
+        //context.lineWidth=1;
     }
 
     highlight(context) {
-        context.lineWidth=0.5;
+        //context.lineWidth=0.5;
         context.strokeStyle = this.theme.getColor(themes.Theme.Color.LineColorSelected);
         this.draw(context);
         this.drawCtrlPt(context);
         this.highlightCtrlPt(context);
-        context.lineWidth=1;
+        //context.lineWidth=1;
     }
 
 }
@@ -2685,3 +2685,27 @@ export class CDynamicLinePlotter extends NamedObject {
 
 }
 
+
+export class DrawNPlotter extends CToolPlotter {
+
+    constructor(name, toolObject) {
+        super(name, toolObject);
+        this.toolObject = toolObject;
+        this.ctrlPtsNum = 4;
+        this.ctrlPts = [new Array(this.ctrlPtsNum), new Array(2)];
+        this.getCtrlPts();
+    }
+
+    draw(context) {
+        this.updateCtrlPtPos();
+        this.getAreaPos();
+        let a=this.toolObject.getPoint(0).getPosXY();
+        let b=this.toolObject.getPoint(1).getPosXY();
+        let c=this.toolObject.getPoint(2).getPosXY();
+        let d=this.toolObject.getPoint(3).getPosXY();
+        Plotter.drawLine(context, a.x, a.y, b.x, b.y);
+        Plotter.drawLine(context, b.x, b.y, c.x, c.y);
+        Plotter.drawLine(context, c.x, c.y, d.x,d.y);
+    }
+
+}

@@ -150,7 +150,7 @@ export class Control {
         chart.setTitle();
         Kline.instance.data = eval(res.data);
 
-        let updateDataRes = Kline.instance.chartMgr.updateData("frame0.k0", Kline.instance.data.lines);
+        let updateDataRes = Kline.instance.chartMgr.updateData("frame0.k0", Kline.instance.data);
         Kline.instance.requestParam = Control.setHttpRequestParam(Kline.instance.symbol, Kline.instance.range, null, Kline.instance.chartMgr.getDataSource("frame0.k0").getLastDate());
 
         let intervalTime = Kline.instance.intervalTime < Kline.instance.range ? Kline.instance.intervalTime : Kline.instance.range;

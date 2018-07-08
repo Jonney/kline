@@ -1,5 +1,7 @@
 import {NamedObject} from './named_object'
 import {CToolManager} from './ctool_manager'
+import * as ctools from './ctools'
+import {CPoint} from './cpoint'
 import Kline from './kline'
 
 export class DataSource extends NamedObject {
@@ -94,6 +96,7 @@ export class MainDataSource extends DataSource {
     }
 
     update(data) {
+        let candles=data.candles;
         this._updatedCount = 0;
         this._appendedCount = 0;
         this._erasedCount = 0;
@@ -101,9 +104,9 @@ export class MainDataSource extends DataSource {
         if (len > 0) {
             let lastIndex = len - 1;
             let lastItem = this._dataItems[lastIndex];
-            let e, i, cnt = data.length;
+            let e, i, cnt = candles.length;
             for (i = 0; i < cnt; i++) {
-                e = data[i];
+                e = candles[i];
                 if (e[0] === lastItem.date) {
                     if (lastItem.open === e[1] &&
                         lastItem.high === e[2] &&
@@ -127,7 +130,7 @@ export class MainDataSource extends DataSource {
                     if (i < cnt) {
                         this.setUpdateMode(DataSource.UpdateMode.Append);
                         for (; i < cnt; i++, this._appendedCount++) {
-                            e = data[i];
+                            e = candles[i];
                             this._dataItems.push({
                                 date: e[0],
                                 open: e[1],
@@ -148,9 +151,9 @@ export class MainDataSource extends DataSource {
         }
         this.setUpdateMode(DataSource.UpdateMode.Refresh);
         this._dataItems = [];
-        let d, n, e, i, cnt = data.length;
+        let d, n, e, i, cnt = candles.length;
         for (i = 0; i < cnt; i++) {
-            e = data[i];
+            e = candles[i];
             for (n = 1; n <= 4; n++) {
                 d = this.calcDecimalDigits(e[n]);
                 if (this._decimalDigits < d)
@@ -164,6 +167,29 @@ export class MainDataSource extends DataSource {
                 close: e[4],
                 volume: e[5]
             });
+        }
+        //let segLine=new ctools.NObject('frame0.k0');
+        //segLine.getPoint(0).setPosIV((1529712000000-this.getDataAt(0).date)/14400000,6177.45);
+        //segLine.getPoint(1).setPosIV((1529841600000-this.getDataAt(0).date)/14400000,5780.0);
+        //segLine.setState(ctools.CToolObject.state.AfterDraw);
+        //this.addToolObject(segLine);
+        let toolObjects=data.toolObjects;
+        if (toolObjects && toolObjects.n){
+            let firstDate=this.getDataAt(0).date;
+            let secondDate=this.getDataAt(1).date;
+            let period=secondDate-firstDate;
+            let i, l = toolObjects.n.length;
+            for (i = 0; i < l; i++) {
+                let pos=toolObjects.n[i];
+                let n=new ctools.NObject('frame0.k0');
+                n.setPosIV(
+                    (pos[0]-firstDate)/period,pos[1],
+                    (pos[2]-firstDate)/period,pos[3],
+                    (pos[4]-firstDate)/period,pos[5],
+                    (pos[6]-firstDate)/period,pos[7],
+                );
+                this.addToolObject(n);
+            }
         }
         return true;
     }
