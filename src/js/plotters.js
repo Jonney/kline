@@ -1394,7 +1394,7 @@ export class RangePlotter extends NamedObject {
         let mgr = ChartManager.instance;
         let theme = mgr.getTheme(this.getFrameName());
         context.font = theme.getFont(themes.Theme.Font.Default);
-        return context.measureText((Math.floor(v) + 0.88).toString()).width + 16;
+        return context.measureText((Math.floor(v) + 0.88).toString()).width + 6;//+ 16;
     }
 
     Draw(context) {
@@ -1426,7 +1426,7 @@ export class RangePlotter extends NamedObject {
         for (let n in gradations) {
             let y = range.toY(gradations[n]);
             gridRects.push({x: left, y: y, w: 6, h: 1});
-            gridRects.push({x: right - 6, y: y, w: 6, h: 1});
+            //gridRects.push({x: right - 6, y: y, w: 6, h: 1});
             context.fillText(Util.fromFloat(gradations[n], 2), center, y);
         }
         if (gridRects.length > 0) {
@@ -1821,14 +1821,14 @@ export class LastClosePlotter extends Plotter {
         let y = range.toY(v);
         let left = area.getLeft() + 1;
         context.fillRect(left, y - 10, area.getWidth(), 20);
-        Plotter.drawLine(context, left, y, left + 4, y);
+        //Plotter.drawLine(context, left, y, left + 4, y);
         context.strokeStyle = '#000';theme.getColor(themes.Theme.Color.Text5);
         Plotter.createHorzDashedLine(context, 0, left, y, 3, 1);
         context.fill();
         //Plotter.drawLine(context, left, y, left + 3, y + 2);
         //Plotter.drawLine(context, left, y, left + 3, y - 2);
         context.fillStyle = theme.getColor(themes.Theme.Color.Text5);
-        context.fillText(Util.fromFloat(v, ds.getDecimalDigits()), left + 10, y);
+        context.fillText(Util.fromFloat(v, ds.getDecimalDigits()), left + 3/*+ 10*/, y);
     }
 
 }
