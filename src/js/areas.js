@@ -240,7 +240,7 @@ export class MainArea extends ChartArea {
                 break;
             case ChartManager.DrawingTool.CrossCursor:
                 if (mgr.showCrossCursor(this, x, y))
-                    mgr.hideCursor();
+                    mgr.showCursor('crosshair');
                 else
                     mgr.showCursor();
                 break;
