@@ -206,10 +206,10 @@ export class TradingViewTheme extends Theme {
         this._colors[Theme.Color.Text3] = "#666";
         this._colors[Theme.Color.Text4] = "#444";
         this._colors[Theme.Color.Text5] = "#fff";
-        this._colors[Theme.Color.LineColorNormal] = "#8c8c8c";
-        this._colors[Theme.Color.LineColorSelected] = "#393c40";
+        this._colors[Theme.Color.LineColorNormal] = "#000080";
+        this._colors[Theme.Color.LineColorSelected] = "#0000AA";
         this._colors[Theme.Color.CircleColorFill] = "#ffffff";
-        this._colors[Theme.Color.CircleColorStroke] = "#393c40";
+        this._colors[Theme.Color.CircleColorStroke] = "#666666";
         this._fonts = [];
         this._fonts[Theme.Font.Default] = "12px Verdana";
     }

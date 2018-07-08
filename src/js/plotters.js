@@ -2148,21 +2148,27 @@ export class CToolPlotter extends NamedObject {
     }
 
     updateDraw(context) {
+        context.lineWidth=0.5;
         context.strokeStyle = this.theme.getColor(themes.Theme.Color.LineColorNormal);
         this.draw(context);
         this.drawCtrlPt(context);
+        context.lineWidth=1;
     }
 
     finishDraw(context) {
+        context.lineWidth=0.5;
         context.strokeStyle = this.theme.getColor(themes.Theme.Color.LineColorNormal);
         this.draw(context);
+        context.lineWidth=1;
     }
 
     highlight(context) {
+        context.lineWidth=0.5;
         context.strokeStyle = this.theme.getColor(themes.Theme.Color.LineColorSelected);
         this.draw(context);
         this.drawCtrlPt(context);
         this.highlightCtrlPt(context);
+        context.lineWidth=1;
     }
 
 }
