@@ -712,7 +712,7 @@ export class MainInfoPlotter extends Plotter {
             //if (!Plotter.drawString(context, '时间: ' +
             //        year + '-' + month + '-' + date + '  ' + hour + ':' + minute, rect))
             //    return;
-            mainInfoDiv.find('.date').text('时间: ' +
+            mainInfoDiv.find('.date').text('时间 ' +
                     year + '-' + month + '-' + date + '  ' + hour + ':' + minute);
             //if (!Plotter.drawString(context, '  开: ' + data.open.toFixed(digits), rect))
             //    return;
@@ -723,10 +723,10 @@ export class MainInfoPlotter extends Plotter {
             //if (!Plotter.drawString(context, '  收: ' + data.close.toFixed(digits), rect))
             //    return;
             mainInfoDiv.find('.price').text(
-                '  开: ' + data.open.toFixed(digits)
-                + '  高: ' + data.high.toFixed(digits)
-                + '  低: ' + data.low.toFixed(digits)
-                + '  收: ' + data.close.toFixed(digits)
+                '  开 ' + data.open.toFixed(digits)
+                + '  高 ' + data.high.toFixed(digits)
+                + '  低 ' + data.low.toFixed(digits)
+                + '  收 ' + data.close.toFixed(digits)
             );
         } else if (lang === "en-us") {
             // if (!Plotter.drawString(context, 'DATE: ' +
@@ -758,7 +758,7 @@ export class MainInfoPlotter extends Plotter {
             if (lang === "zh-cn") {
                 //if (!Plotter.drawString(context, '  涨幅: ', rect))
                 //    return;
-                increase += '  涨幅: ';
+                increase += '  涨幅 ';
             } else if (lang === "en-us") {
                 if (!Plotter.drawString(context, '  CHANGE: ', rect))
                     return;
@@ -803,11 +803,11 @@ export class MainInfoPlotter extends Plotter {
             //if (!Plotter.drawString(context, '  振幅: ' + amplitude.toFixed(2) + ' %', rect)) {
             //    return;
             //}
-            strAmplitude += '  振幅: ' + amplitude.toFixed(2) + ' %';
+            strAmplitude += '  振幅 ' + amplitude.toFixed(2) + ' %';
             //if (!Plotter.drawString(context, '  量: ' + data.volume.toFixed(2), rect)) {
             //    return;
             //}
-            strAmplitude += '  量: ' + data.volume.toFixed(2);
+            strAmplitude += '  量 ' + data.volume.toFixed(8);
             mainInfoDiv.find('.amplitude').text(strAmplitude);
         } else if (lang === "en-us") {
             if (!Plotter.drawString(context, '  AMPLITUDE: ' + amplitude.toFixed(2) + ' %', rect)) {
@@ -1317,6 +1317,13 @@ export class TimelinePlotter extends Plotter {
             Plotter.createRectangles(context, gridRects);
             context.fill();
         }
+        let controlBar=$('.control-bar__btn--back-present');
+        if(timeline.getLastIndex()>=timeline.getMaxIndex() && controlBar.css('display')!='none'){
+            controlBar.hide();
+        }
+        if(timeline.getLastIndex()<timeline.getMaxIndex() && controlBar.css('display')=='none'){
+            controlBar.show();
+        }
     }
 
     DrawGrid(context) {
@@ -1427,6 +1434,7 @@ export class RangePlotter extends NamedObject {
             Plotter.createRectangles(context, gridRects);
             context.fill();
         }
+        $('.control-bar__btn--back-present').css('right',area.getWidth()-56);
     }
 
 }

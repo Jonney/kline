@@ -194,7 +194,7 @@ export class TradingViewTheme extends Theme {
         this._colors[Theme.Color.Indicator2] = "#e849b9";
         this._colors[Theme.Color.Indicator3] = "#1478c8";
         this._colors[Theme.Color.Grid0] = "rgb(230, 230, 230)";
-        this._colors[Theme.Color.Grid1] = "#afb1b3";
+        this._colors[Theme.Color.Grid1] = "#4D4D4D";
         this._colors[Theme.Color.Grid2] = "#ccc";
         this._colors[Theme.Color.Grid3] = "#bbb";
         this._colors[Theme.Color.Grid4] = "#aaa";

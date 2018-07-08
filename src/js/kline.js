@@ -574,6 +574,22 @@ export default class Kline {
                 ChartSettings.save();
                 ChartManager.instance.redraw('All', false);
             });
+            $('.control-bar__btn--back-present').click(function(){
+                let mgr = ChartManager.instance;
+                var timeLine=mgr.getTimeline('frame0.k0');
+                var moveCount=0;
+                var interval=setInterval(function(){
+                    var first=timeLine.getFirstIndex();
+                    var last=timeLine.getLastIndex();
+                    if(last>=timeLine.getMaxIndex()){
+                        clearInterval(interval);
+                    }else{
+                        timeLine.startMove();
+                        timeLine.move(-1*(++moveCount)*moveCount);
+                        mgr.redraw('All',false);
+                    }
+                },50);
+            });
 
 
             $('body').on('click', '#sizeIcon', function () {

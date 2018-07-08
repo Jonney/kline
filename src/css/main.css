@@ -1287,3 +1287,38 @@ body {
     font-size: 12px;
     font-family: 微软雅黑;
 }
+
+#chart_main_info .price{
+    margin:0 12px;
+}
+
+.control-bar__btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	margin: 0 4px;
+	width: 28px;
+	height: 28px;
+	background-color: hsla(0,0%,100%,.7);
+	color: #758696;
+	box-shadow: 0 1px 4px 0 rgba(117,134,150,.38);
+	cursor: pointer;
+	pointer-events: auto;
+	transition: background-color .3s,color .3s;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	z-index: 1;
+}
+
+.control-bar__btn--back-present {
+	position: absolute;
+	/* rtl: ignore; */
+	right: 20px;
+	bottom: 30px;
+}
+.control-bar {
+	visibility: visible;
+}
