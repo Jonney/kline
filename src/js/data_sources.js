@@ -168,11 +168,7 @@ export class MainDataSource extends DataSource {
                 volume: e[5]
             });
         }
-        //let segLine=new ctools.NObject('frame0.k0');
-        //segLine.getPoint(0).setPosIV((1529712000000-this.getDataAt(0).date)/14400000,6177.45);
-        //segLine.getPoint(1).setPosIV((1529841600000-this.getDataAt(0).date)/14400000,5780.0);
-        //segLine.setState(ctools.CToolObject.state.AfterDraw);
-        //this.addToolObject(segLine);
+        //渲染自定义图形
         let toolObjects=data.toolObjects;
         if (toolObjects && toolObjects.n){
             let firstDate=this.getDataAt(0).date;
