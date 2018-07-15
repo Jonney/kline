@@ -170,21 +170,35 @@ export class MainDataSource extends DataSource {
         }
         //渲染自定义图形
         let toolObjects=data.toolObjects;
-        if (toolObjects && toolObjects.n){
-            let firstDate=this.getDataAt(0).date;
-            let secondDate=this.getDataAt(1).date;
-            let period=secondDate-firstDate;
-            let i, l = toolObjects.n.length;
-            for (i = 0; i < l; i++) {
-                let pos=toolObjects.n[i];
-                let n=new ctools.NObject('frame0.k0');
-                n.setPosIV(
-                    (pos[0]-firstDate)/period,pos[1],
-                    (pos[2]-firstDate)/period,pos[3],
-                    (pos[4]-firstDate)/period,pos[5],
-                    (pos[6]-firstDate)/period,pos[7],
-                );
-                this.addToolObject(n);
+        if(toolObjects){
+            if (toolObjects.n){
+                let firstDate=this.getDataAt(0).date;
+                let secondDate=this.getDataAt(1).date;
+                let period=secondDate-firstDate;
+                let i, l = toolObjects.n.length;
+                for (i = 0; i < l; i++) {
+                    let pos=toolObjects.n[i];
+                    let n=new ctools.NObject('frame0.k0');
+                    n.setPosIV(
+                        (pos[0]-firstDate)/period,pos[1],
+                        (pos[2]-firstDate)/period,pos[3],
+                        (pos[4]-firstDate)/period,pos[5],
+                        (pos[6]-firstDate)/period,pos[7],
+                    );
+                    this.addToolObject(n);
+                }
+            }
+            if (toolObjects.circles){
+                let firstDate=this.getDataAt(0).date;
+                let secondDate=this.getDataAt(1).date;
+                let period=secondDate-firstDate;
+                let i, l = toolObjects.circles.length;
+                for (i = 0; i < l; i++) {
+                    let pos=toolObjects.circles[i];
+                    let circle=new ctools.CircleObject('frame0.k0');
+                    circle.setPosIV((pos[0]-firstDate)/period,pos[1]);
+                    this.addToolObject(circle);
+                }
             }
         }
         return true;

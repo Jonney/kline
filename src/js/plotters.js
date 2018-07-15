@@ -2715,5 +2715,29 @@ export class DrawNPlotter extends CToolPlotter {
         Plotter.drawLine(context, b.x, b.y, c.x, c.y);
         Plotter.drawLine(context, c.x, c.y, d.x,d.y);
     }
+}
 
+export class DrawCirclePlotter extends CToolPlotter {
+
+    constructor(name, toolObject) {
+        super(name, toolObject);
+        this.toolObject = toolObject;
+        this.ctrlPtsNum = 1;
+        this.ctrlPts = [new Array(this.ctrlPtsNum), new Array(2)];
+        this.getCtrlPts();
+    }
+
+    draw(context) {
+        //this.updateCtrlPtPos();
+        //this.getAreaPos();
+        //Plotter.drawCircle(context, this.toolObject.getPoint(0).getPosXY(), this.normalSize);
+        let center=this.toolObject.getPoint(0).getPosXY();
+        let centerX = center.x;
+        let centerY = center.y;
+        context.beginPath();
+        context.arc(centerX, centerY, this.normalSize, 0, 2 * Math.PI, false);
+        context.fillStyle = this.theme.getColor(themes.Theme.Color.CircleColorFill);
+        context.fill();
+        context.stroke();
+    }
 }

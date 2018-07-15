@@ -855,7 +855,7 @@ export class NObject extends CToolObject {
         this.addPoint(new CPoint(name));
         this.drawer = new plotters.DrawNPlotter(name, this);
     }
-    
+
     setPosIV(aX, aY, bX, bY, cX, cY, dX, dY) {
         this.getPoint(0).setPosIV(aX, aY);
         this.getPoint(1).setPosIV(bX, bY);
@@ -867,7 +867,26 @@ export class NObject extends CToolObject {
         this.getPoint(3).setState(CPoint.state.Show);
         this.setState(CToolObject.state.AfterDraw);
     }
-    
+
+    isSelected(x, y) {
+        return false;
+    }
+}
+
+export class CircleObject extends CToolObject {
+
+    constructor(name) {
+        super(name);
+        this.addPoint(new CPoint(name));
+        this.drawer = new plotters.DrawCirclePlotter(name, this);
+    }
+
+    setPosIV(x,y) {
+        this.getPoint(0).setPosIV(x, y);
+        this.getPoint(0).setState(CPoint.state.Show);
+        this.setState(CToolObject.state.AfterDraw);
+    }
+
     isSelected(x, y) {
         return false;
     }
