@@ -2735,8 +2735,9 @@ export class DrawCirclePlotter extends CToolPlotter {
         let centerX = center.x;
         let centerY = center.y;
         context.beginPath();
-        context.arc(centerX, centerY, this.normalSize, 0, 2 * Math.PI, false);
+        context.strokeStyle = this.theme.getColor(themes.Theme.Color.CircleColorStroke);
         context.fillStyle = this.theme.getColor(themes.Theme.Color.CircleColorFill);
+        context.arc(centerX, centerY, this.normalSize, 0, 2 * Math.PI, false);
         context.fill();
         context.stroke();
     }
