@@ -102,8 +102,12 @@ export class MainDataProvider extends DataProvider {
 
     getMinMaxAt(index, minmax) {
         let data = this._candlestickDS.getDataAt(index);
-        minmax.min = data.low;
-        minmax.max = data.high;
+        let top=data.close,bottom=data.open;
+        if(data.open>data.close){
+            top=data.open,bottom=data.close;
+        }
+        minmax.min = bottom/data.low>100?bottom:data.low;
+        minmax.max = data.high/top>100?top:data.high;
         return true;
     }
 
